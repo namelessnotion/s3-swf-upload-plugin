@@ -12,7 +12,7 @@ class S3UploadsController < ApplicationController
     file_size       = params[:file_size]
     acl             = 'private'
     https           = 'false'
-    expiration_date = 1.hours.from_now.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+    expiration_date = 1.hours.from_now.utc.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
     policy = Base64.encode64(
 "{
