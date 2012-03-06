@@ -8,7 +8,9 @@
 			import com.adobe.net.MimeTypeMap;
 			import com.elctech.S3UploadOptions;
 			import com.elctech.S3UploadRequest;
-			
+      import mx.core.FlexGlobals;
+      import mx.controls.Alert;
+	
 			private var mimeMap:MimeTypeMap = new MimeTypeMap();
 			private var options:S3UploadOptions = new S3UploadOptions();
 			private var fileReference:FileReference;
@@ -17,11 +19,14 @@
 			    if (ExternalInterface.available) {
 			    	ExternalInterface.addCallback("init", init);
 			    	ExternalInterface.addCallback("upload", upload);
-				  	options.SignatureQueryURL = Application.application.parameters.signature_query_url;
-				  	options.onSuccessCall     = Application.application.parameters.id + '.onSuccess';
-				  	options.onFailedCall      = Application.application.parameters.id + '.onFailed';
-				  	options.onSelectedCall    = Application.application.parameters.id + '.onSelected';
-				  	options.onCancelCall      = Application.application.parameters.id + '.onCancel';
+				  	options.SignatureQueryURL = FlexGlobals.topLevelApplication.parameters.signature_query_url;
+				  	options.onSuccessCall     = FlexGlobals.topLevelApplication.parameters.id + '.onSuccess';
+				  	options.onFailedCall      = FlexGlobals.topLevelApplication.parameters.id + '.onFailed';
+				  	options.onSelectedCall    = FlexGlobals.topLevelApplication.parameters.id + '.onSelected';
+				  	options.onCancelCall      = FlexGlobals.topLevelApplication.parameters.id + '.onCancel';
+				  	options.csfr      = ExternalInterface.call(FlexGlobals.topLevelApplication.parameters.id + '.csfr');
+				  	options.uuid      = ExternalInterface.call(FlexGlobals.topLevelApplication.parameters.id + '.uuid');
+				  	options.user_id      = ExternalInterface.call(FlexGlobals.topLevelApplication.parameters.id + '.user_id');
 			    }
 			}
 			
@@ -54,7 +59,6 @@
 			}
 			
 			private function upload(prefixPath:String = ""):void {
-			    
 			    // return if user not selected any file
 			    if (options.FileSize == null) {
 			    	trace(options.onSuccessCall);
@@ -70,12 +74,15 @@
 			    var variables:URLVariables = new URLVariables();
 			    
 			    options.PrefixPath         = prefixPath; // reset options.PrefixPath
-			    options.key                = options.PrefixPath + options.FileName;
+          options.key                = options.user_id + "/" + options.uuid + "/" +options.FileName;
 			    
 			    variables.file_name        = options.FileName;
 			    variables.file_size        = options.FileSize;
 			    variables.key              = options.key;
-			    variables.content_type     = options.ContentType;
+          variables.content_type     = options.ContentType;
+          variables.csfr             = options.csfr;
+          variables.uuid             = options.uuid;
+          variables.user_id          = options.user_id;
 			    
 			    request.method             = URLRequestMethod.GET;
 			    request.data               = variables;
@@ -143,7 +150,7 @@
 			        selectButton.enabled = true;
 			        textInput.text = "Upload complete!";
 			        trace(options.onSuccessCall);
-			        ExternalInterface.call(options.onSuccessCall);
+			        ExternalInterface.call(options.onSuccessCall, options.key, options.FileSize);
 			        trace(event);
 			    });
 			    

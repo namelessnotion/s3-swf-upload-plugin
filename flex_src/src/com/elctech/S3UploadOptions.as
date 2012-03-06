@@ -29,6 +29,9 @@ package com.elctech {
         public var FileName:String;
         public var FileSize:String;
         public var SignatureQueryURL:String;
+        public var csfr:String;
+        public var uuid:String;
+        public var user_id:String;
 
         public var onSuccessCall:String  = "s3_swf.onSuccess";
         public var onFailedCall:String   = "s3_swf.onFailed";
